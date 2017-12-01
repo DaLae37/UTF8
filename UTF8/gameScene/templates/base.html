@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+<head>
+  <meta charset = 'utf-8'/>
+  <link rel='stylesheet' href="{% static 'css/gameScene_css.css' %}">
+</head>
+<body>
+  <img src = "{% static 'img/background.png' %}">
+  <a href = "ingame.html">안녕</a>
+  <a href = "index.html">바이</a>
+  {% block content %}
+  {% endblock %}
+</body>
+</html>
