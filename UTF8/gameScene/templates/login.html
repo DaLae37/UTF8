@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block head %}
+<script>
+  function backPage(){
+    document.location.href = "{% url 'index' %}"
+  }
+</script>
+{% endblock %}
+{% block content %}
+<h2>로그인</h2>
+<form method="post" action="">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" name = "login" value="로그인"/>
+  <button onclick="backPage()">뒤로가기</button>
+</form>
+{% endblock %}

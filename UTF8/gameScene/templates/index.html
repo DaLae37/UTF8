@@ -1,5 +1,29 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% block head %}
+<script>
+  function enterGame(){
+      {% if user.is_authenticated %}
+        document.location.href = '{% url "ingame" %}'
+      {% else %}
+        alert('로그인이 필요합니다')
+      {% endif %}
+  }
+  function logout(){
+    document.location.href = '{% url "logout" %}'
+    alert('로그아웃 되었습니다')
+  }
+  function login(){
+    document.location.href = '{% url "login" %}'
+  }
+</script>
+{% endblock %}
 {% block content %}
-  <p>Hellow</p>
+  {% if user.is_authenticated %}
+    <p>어서오세요, {{ user.username }}님</p>
+    <button onclick="logout()">로그 아웃</button>
+  {% else %}
+    <p>로그인이 필요합니다</p>
+    <button onclick="login()">로그 인</button>
+  {% endif %}
+  <button onclick="enterGame()">게임 입장</button>
 {% endblock %}

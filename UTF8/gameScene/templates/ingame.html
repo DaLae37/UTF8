@@ -1,5 +1,296 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% block head %}
+<link rel='stylesheet' href="{% static 'css/gameScene_css.css' %}">
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+{% endblock %}
 {% block content %}
-  <p>Bye</p>
+<canvas id="gameCanvas">
+  Canvas에러
+</canvas>
+
+<script>
+//canvas Set
+var canvas = document.getElementById('gameCanvas')
+var context = canvas.getContext('2d')
+
+canvas.width = 977;
+canvas.height = 767;
+
+
+//canvsss Set Finish
+
+//canvas img Set
+var background = new Image()
+background.src = '{% static "img/background.png" %}'
+
+var player = new Image()
+player.src = '{% static "img/player.png" %}'
+
+var arrow = new Image()
+arrow.src = '{% static "img/arrow.png" %}'
+
+var enemy = new Image()
+enemy.src= '{% static "img/enemy.png" %}'
+
+var boss = new Image()
+boss.src = '{% static "img/boss.png" %}'
+
+var heart = new Image()
+heart.src = '{% static "img/heart.png" %}'
+
+var nuclear = new Image()
+nuclear.src = '{% static "img/nuclear.png" %}'
+
+var qShot = new Image()
+qShot.src = '{% static "img/shot.png" %}'
+//canvas img Set Finish
+
+//canvas object Set
+var playerX = (canvas.width)/2;
+var playerY = 300;
+
+var bossX = 0;
+var bossY = 0;
+
+var bossHealth = 20;
+
+var health = 5
+
+var nuclearX = 0;
+var nuclearY = 0;
+var beforeTime = Date.now()
+var eTime
+
+
+//canvas object Set Finish
+var shot = new Array()
+
+for(var a = 0; a<1000+1; a++){
+    shot[a] = 1;
+}
+
+var enemyX = new Array()
+
+for(var i = 0; i<1000+1; i++){
+    enemyX[i] = 3;
+}
+
+var enemyY = new Array()
+
+for(var b = 0; b<1000+1; b++){
+    enemyY[b] = 3;
+}
+
+var bossShot = new Array()
+
+for(var k = 0; k<1000; k++){
+    bossShot[k] = 2;
+}
+
+
+//canvas etc Set
+var i = 0;
+var e = 0;
+
+var bossMoving = 25
+
+var bossCount = 1;
+
+var time = 0;
+
+//canvas etc Set Finish
+
+setInterval(init,50)
+
+
+setInterval(drawTime,1000)
+
+
+function init(){
+       this.eTime = (Date.now() - this.beforeTime) / 1000;
+       context.clearRect(0,0,canvas.width,canvas.height)
+       drawBackground()
+       drawPlayer()
+       drawArrow()
+       drawBoss()
+       bossPungta()
+       if(bossHealth < 10){
+            bossUltimate()
+       }
+       if(bossHealth < 0){
+           alert("You Win !!");
+           document.location.href = '{% url "index" %}'
+       }
+       heartNum()
+       beforeTime = Date.now()
+}
+
+
+function heartNum(){
+    var a = 20;
+    for(var i = 0; i<health; i++){
+        context.drawImage(heart,a,470)
+        a = a+70;
+    }
+    if(health == 0){
+        document.location.href = '{% url "index" %}'
+        alert("사망! "+time+"초 생존");
+    }
+}
+
+function drawTime(){
+    time++;
+}
+
+
+function bossUltimate(){
+    makeEnemy();
+    drawEnemy();
+}
+
+function drawBackground(){
+  context.drawImage(background,0,0,977,567)
+}
+
+function drawPlayer(){
+    context.drawImage(player,playerX,playerY,50,50)
+}
+
+function makeEnemy(){
+    var checkXY = Math.floor(Math.random()*2)
+
+    if(checkXY == 0){
+        // x좌표 기반
+        var checkX =Math.floor(Math.random()*100+900)
+        var inputY = Math.floor(Math.random()*1000)
+        enemyX[checkX] = inputY
+
+    }
+    else if(checkXY == 1){
+        var checkY = Math.floor(Math.random()*100+500)
+        var inputX = Math.floor(Math.random()*1000);
+        enemyY[checkY] = inputX
+
+    }
+}
+
+function drawEnemy(){
+    for(var a = 0; a<1000+1; a++){
+        if(enemyX[a] != 3){
+            context.drawImage(enemy,a,enemyX[a])
+            enemyX[a-25] = enemyX[a];
+
+            if(playerX > a-1 && playerX<a+51 && playerY > enemyX[a]-1 && playerY < enemyX[a]+50){
+                enemyY[a-75] = enemyY[a-25];
+                health--;
+            }
+
+            enemyX[a] = 3
+        }
+    }
+
+    for(var b = 0; b<1000+1; b++){
+        if(enemyY[b] != 3){
+            context.drawImage(enemy,enemyY[b],b)
+            enemyY[b-25] = enemyY[b];
+
+            if(playerY > b-1 && playerY<b+51 && playerX > enemyY[b]-1 && playerX < enemyY[b]+50){
+                enemyY[b-70] = enemyY[b-25];
+                health--;
+            }
+
+            enemyY[b] = 3
+        }
+    }
+
+
+}
+
+function drawArrow(){
+    for(i=0; i<canvas.width+1; i++){
+        if(shot[i] != 1){
+            if(i > bossX-1 && i+10 < bossX+130+1 && shot[i] > bossY-1 && shot[i]+25 <bossY+130){
+                bossHealth--;
+            }
+            if(shot[i] > 0){
+              context.drawImage(arrow,i,shot[i])
+              shot[i] = shot[i] - 350 * eTime;
+            }
+        }
+
+    }
+}
+
+function drawBoss(){
+    context.drawImage(boss,bossX,bossY)
+    if(bossX < 1){
+        bossX = 0
+        bossMoving = 25
+    }
+    else if(bossX > 1000-81){
+        bossX = 1000-80
+        bossMoving = -25
+    }
+
+    bossX = bossX + bossMoving;
+
+}
+
+function bossPungta(){
+    if(bossShot[bossX] == 2){
+        bossShot[bossX] = 0
+    }
+
+    h = 100
+    for(var i = 0; i<1000; i+=40){
+
+        if(bossShot[i] != 2){
+            context.drawImage(qShot,i,bossShot[i])
+            bossShot[i] += 50
+            if(playerY > bossShot[i]-1 && playerY<bossShot[i]+51 && playerX > i-1 && playerX < i+50){
+                bossShot[i] +=60
+                health--;
+            }
+
+            if(bossShot[i] > 500){
+                bossShot[i] = 2
+            }
+
+        }
+    }
+
+}
+window.onkeydown = function(e){
+  if(e.keyCode == 32)
+    shot[Math.round(playerX) + 20] = playerY
+}
+window.onkeypress = function(e){
+
+    if(e.keyCode == 119 || e.keyCode == 87){
+        playerY = playerY - 250 * eTime;
+        if(playerY < 1){
+            playerY = 0;
+        }
+    }
+    if(e.keyCode == 97 || e.keyCode == 65){
+      playerX = playerX - 250 * this.eTime;
+      if(playerX < 25){
+          playerX = 25;
+      }
+    }
+    if(e.keyCode == 115 || e.keyCode == 83){
+      playerY = playerY + 250 * eTime;
+      if(playerY > canvas.height-300){
+          playerY = canvas.height-300;
+      }
+    }
+    if(e.keyCode == 100 || e.keyCode == 68){
+        playerX = playerX + 250 * this.eTime;
+        if(playerX > canvas.width-75){
+            playerX = canvas.width-75;
+        }
+    }
+}
+</script>
 {% endblock %}
